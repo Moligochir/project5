@@ -12,14 +12,14 @@ interface DetectionResult {
   box: { xmin: number; ymin: number; xmax: number; ymax: number };
 }
 
-export const POSt = async (request: NextRequest) => {
+export const POST = async (request: NextRequest) => {
   try {
     const formData = await request.formData();
     const image = formData.get("image") as File;
     if (!image)
       return NextResponse.json({ error: "No image" }, { status: 400 });
     const results = (await inference.objectDetection({
-      model: "",
+      model: "facebook/detr-resnet-50",
       data: image,
     })) as DetectionResult[];
     const object = results
@@ -27,26 +27,10 @@ export const POSt = async (request: NextRequest) => {
       .map((obj) => ({ label: obj.label, score: obj.score, box: obj.box }));
 
     return NextResponse.json({ object });
-  } catch (error) 
-  {return NextResponse.json({error: error instanceof Error ? error.message :"Error"}, {status:500}, )
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Error" },
+      { status: 500 }
+    );
+  }
 };
-
-// export const POST = async (request: NextRequest) => {
-//   try {
-//     const formData = await request.formData();
-//     const image = formData.get("image") as File;
-//   if (!image) {return NextResponse.json({ error: "No image"},{status: 400});}}
-
-//  const results= (await inference.objectDetection({
-//     model: "",
-//     data: image,
-// })) as DetectionResult[];
-
-// const object =results
-// .filter((obj) => obj.score > 0.5)
-// .map((obj) => ({label: obj.label, score:obj.score, box:obj.box}))
-
-// return NextResponse.json({object})
-// } catch (error) {return NextResponse.json({error: error instanceof error ? error.message :"Error"},
-//     {status:500},
-// )}

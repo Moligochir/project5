@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import { FileText, RotateCw, Sparkles, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -15,26 +15,67 @@ import {
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
+type DetectedObject = {
+  label: string;
+  score: number;
+  box: { xmin: number; ymin: number; xmax: number; ymax: number };
+};
+
 export default function Home() {
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [previewUrl, setPreviewUrl] = useState("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [objects, setObjects] = useState<DetectedObject[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  const handleImageChange = (event) => {
-    const files = event.target.files;
-    if (files && files.length > 0) {
-      const file = files[0];
-      setSelectedImage(file);
-
-      setPreviewUrl(URL.createObjectURL(file));
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+      setImagePreview(URL.createObjectURL(file));
+      setObjects([]);
     }
   };
-  const removeSelectedImage = () => {
-    setSelectedImage(null);
 
-    if (previewUrl) {
-      URL.revokeObjectURL(previewUrl);
+  const handleDetect = async () => {
+    if (!selectedFile) return;
+    setLoading(true);
+    setObjects([]);
+
+    try {
+      const formData = new FormData();
+      formData.append("image", selectedFile);
+
+      const data = await (
+        await fetch("/api/object-derection", {
+          method: "POST",
+          body: formData,
+        })
+      ).json();
+
+      setObjects(data.object || []);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
-    setPreviewUrl("");
+  };
+
+  // const handleImageChange = (event) => {
+  //   const files = event.target.files;
+  //   if (files && files.length > 0) {
+  //     const file = files[0];
+  //     setSelectedImage(file);
+
+  //     setPreviewUrl(URL.createObjectURL(file));
+  //   }
+  // };
+  const removeSelectedImage = () => {
+    setSelectedFile(null);
+
+    if (imagePreview) {
+      URL.revokeObjectURL(imagePreview);
+    }
+    setImagePreview("");
   };
   return (
     <div>
@@ -83,9 +124,10 @@ export default function Home() {
                       placeholder="JPG , PNG"
                       accept="image/*" // Restrict file selection to images
                       type="file"
-                      onChange={handleImageChange}
+                      onChange={handleImageUpload}
                     />
-                    {previewUrl && (
+
+                    {imagePreview && (
                       <div style={{ marginTop: "5px" }}>
                         <h3 className="text-[#71717A] text-sm p-2">
                           Upload a food photo, and AI will detect the
@@ -94,7 +136,7 @@ export default function Home() {
                         <div className="flex relative w-full justify-end items-end">
                           <Image
                             className="relative"
-                            src={previewUrl}
+                            src={imagePreview}
                             alt="Preview"
                             width={100}
                             height={50}
@@ -115,8 +157,12 @@ export default function Home() {
                     )}
                   </div>
                   <div className="flex justify-end">
-                    <Button disabled={!previewUrl} className="h-10">
-                      Generate
+                    <Button
+                      onClick={handleDetect}
+                      disabled={!imagePreview}
+                      className="h-10"
+                    >
+                      {loading ? "Generating..." : "Generate"}
                     </Button>
                   </div>
                 </CardContent>
@@ -127,7 +173,19 @@ export default function Home() {
                         <FileText />
                         Here is the summary
                       </div>
-                      Upload a food photo, and AI will detect the ingredients.
+                      <p>
+                        Upload a food photo, and AI will detect the ingredients.
+                      </p>
+
+                      {objects.map((obj, idx) => (
+                        <li
+                          key={idx}
+                          className="p-4 w-full bg-gray-100 rounded-lg"
+                        >
+                          <strong>{obj.label}</strong>
+                          {Math.round(obj.score * 100)}%
+                        </li>
+                      ))}
                     </CardDescription>
                   </CardFooter>
                 </div>
