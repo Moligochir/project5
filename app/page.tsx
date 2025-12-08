@@ -2,7 +2,15 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import { FileText, RotateCw, Sparkles, Trash } from "lucide-react";
+import {
+  FileText,
+  MessageCircle,
+  RotateCw,
+  Send,
+  Sparkles,
+  Trash,
+  XIcon,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -14,6 +22,8 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { TextToText } from "./_components/TextToText";
+import { TextToImage } from "./_components/TextToImage";
 
 type DetectedObject = {
   label: string;
@@ -60,15 +70,6 @@ export default function Home() {
     }
   };
 
-  // const handleImageChange = (event) => {
-  //   const files = event.target.files;
-  //   if (files && files.length > 0) {
-  //     const file = files[0];
-  //     setSelectedImage(file);
-
-  //     setPreviewUrl(URL.createObjectURL(file));
-  //   }
-  // };
   const removeSelectedImage = () => {
     setSelectedFile(null);
 
@@ -78,7 +79,7 @@ export default function Home() {
     setImagePreview("");
   };
   return (
-    <div>
+    <div className="w-full h-full">
       <div className="flex w-full justify-start items-center">
         <h1 className="p-4 pl-12 text-xl font-bold">AI tools</h1>
       </div>
@@ -192,102 +193,38 @@ export default function Home() {
               </Card>
             </TabsContent>
             <TabsContent value="Ingredient recognition">
-              <Card className="border-none shadow-none ">
-                <CardHeader>
-                  <CardTitle>
-                    <div className="flex w-full h-fit justify-between">
-                      <div className="flex gap-2 justify-center items-center text-lg font-bold">
-                        <Sparkles />
-                        Ingredient recognition
-                      </div>
-                      <Button
-                        className="w-12 h-10"
-                        variant="outline"
-                        size="icon"
-                        aria-label="Submit"
-                      >
-                        <RotateCw />
-                      </Button>
-                    </div>
-                  </CardTitle>
-                  <CardDescription>
-                    Describe the food, and AI will detect the ingredients.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="grid gap-6">
-                  <div className="grid gap-3">
-                    <Input
-                      className="h-31"
-                      id="tabs-demo-name"
-                      placeholder="Орц тодорхойлох"
-                    />
-                  </div>
-                  <div className="flex justify-end">
-                    <Button className="h-10">Generate</Button>
-                  </div>
-                </CardContent>
-                <div>
-                  <CardFooter>
-                    <CardDescription>
-                      <div className="flex text-lg font-bold text-black gap-2">
-                        <FileText />
-                        Identified Ingredients
-                      </div>
-                      First, enter your text to recognize an ingredients.
-                    </CardDescription>
-                  </CardFooter>
-                </div>
-              </Card>
+              <TextToText />
             </TabsContent>
             <TabsContent value="Image creator">
-              <Card className="border-none shadow-none ">
-                <CardHeader>
-                  <CardTitle>
-                    <div className="flex w-full h-fit justify-between">
-                      <div className="flex gap-2 justify-center items-center text-lg font-bold">
-                        <Sparkles />
-                        Food image creator
-                      </div>
-                      <Button
-                        className="w-12 h-10"
-                        variant="outline"
-                        size="icon"
-                        aria-label="Submit"
-                      >
-                        <RotateCw />
-                      </Button>
-                    </div>
-                  </CardTitle>
-                  <CardDescription>
-                    What food image do you want? Describe it briefly.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="grid gap-6">
-                  <div className="grid gap-3">
-                    <Input
-                      className="h-32.5"
-                      id="tabs-demo-name"
-                      placeholder="Хоолны тайлбар"
-                    />
-                  </div>
-                  <div className="flex justify-end">
-                    <Button className="h-10">Generate</Button>
-                  </div>
-                </CardContent>
-                <div>
-                  <CardFooter>
-                    <CardDescription>
-                      <div className="flex text-lg font-bold text-black gap-2">
-                        <FileText />
-                        Result
-                      </div>
-                      First, enter your text to generate an image.
-                    </CardDescription>
-                  </CardFooter>
-                </div>
-              </Card>
+              <TextToImage />
             </TabsContent>
           </Tabs>
+        </div>
+      </div>
+      <div className="flex justify-end">
+        {/* <div className="rounded-full flex justify-center items-center text-4 text-white bg-black w-12 h-12">
+          <MessageCircle />
+        </div> */}
+        <div className="text-4 text-black border-2 rounded-sm bg-white w-94 h-118">
+          <div className="flex items-center h-10 justify-between w-full pl-4 pr-4 ">
+            <p className=" text-lg font-semibold">Chat assistant</p>
+
+            <Button
+              variant="outline"
+              size="icon"
+              className="text-black pt-2 pb-2 "
+            >
+              <XIcon />
+            </Button>
+          </div>
+          <hr className="w-full" />
+          <div className="w-full h-3/4"></div>
+          <div className="flex h-10 gap-2 pl-3 pr-3 p-2">
+            <Input placeholder="Type your message..." />
+            <Button size="icon" className="rounded-full">
+              <Send />
+            </Button>
+          </div>
         </div>
       </div>
     </div>
